@@ -2,7 +2,23 @@
 --    ContextMenuCode = {}
 --end
 
-function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
+-- Instead of the typical (context, entity, character, param), we have to use (context, data)
+function ContextMenuCode.DiggingPitMenu(context, data)
+
+	--local subMenu = context:getSubMenu(option.subOption)
+
+	local optionDiggingPit = nil;
+		for i,v in ipairs(context.options) do
+			if v.name == getText("ContextMenu_DiggingPit") then
+				optionDiggingPit = v;
+				subOptionDiggingPit = context:getSubMenu(optionDiggingPit.subOption);
+			end
+		end
+
+	-- We extract the entity, the character, and the param from data
+	local entity = data.entity
+	local character = data.playerObj
+	
 	-- Find and return digging tool from character inventory (item with DIG_GRAVE tag)
 	local shovel = character:getInventory():getFirstEvalRecurse(
 		function(item) -- I think this checks all items for the conditions, and returns the first true
@@ -17,7 +33,11 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 	)	
 	
 	-- The different options
-	local optionDigDirt = context:addOption(getText("ContextMenu_DigDirt"), nil,
+	
+	
+	
+	
+	local optionDigDirt = subOptionDiggingPit:addOption(getText("ContextMenu_DigDirt"), nil,
 			function() -- I hate all these callbacks
 				if luautils.walkAdj(character, entity:getSquare(), false) then
 					ISTimedActionQueue.add(ISDigDirtAction:new(character, entity, shovel))
@@ -25,7 +45,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 			end
 	)
 	
-	local optionDigStone = context:addOption(getText("ContextMenu_DigStone"), nil,
+	local optionDigStone = subOptionDiggingPit:addOption(getText("ContextMenu_DigStone"), nil,
 		function()
 			if luautils.walkAdj(character, entity:getSquare(), false) then
 				ISTimedActionQueue.add(ISDigStoneAction:new(character, entity, shovel))
@@ -33,7 +53,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 		end
 	)
 	
-	local optionQuarryStone = context:addOption(getText("ContextMenu_QuarryStone"), nil,
+	local optionQuarryStone = subOptionDiggingPit:addOption(getText("ContextMenu_QuarryStone"), nil,
 		function() -- I still do
 			if luautils.walkAdj(character, entity:getSquare(), false) then
 				ISTimedActionQueue.add(ISQuarryStoneAction:new(character, entity, pickaxe))

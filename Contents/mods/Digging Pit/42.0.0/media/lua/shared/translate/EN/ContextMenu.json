@@ -1,3 +1,6 @@
 {
-	"ContextMenu_DigStone": "Dig stone"
+	"ContextMenu_DiggingPit": 	"Digging pit",
+	"ContextMenu_DigDirt": 	"Dig dirt",
+	"ContextMenu_DigStone": 	"Dig for stone",
+	"ContextMenu_QuarryStone": 	"Quarry stone"
 }

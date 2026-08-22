@@ -84,7 +84,7 @@ end
 function ISDigStoneAction:complete()
 	-- Roll for rewards
 	for _, reward in ipairs(DigStoneRewards) do
-		if ZombRandFloat() <= reward.chance then
+		if ZombRandFloat(0, 1) <= reward.chance then
 			self.character:getInventory():AddItem(reward.item)
 		end
 	end
