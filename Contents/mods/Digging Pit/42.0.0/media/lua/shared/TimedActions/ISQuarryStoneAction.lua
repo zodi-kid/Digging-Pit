@@ -1,24 +1,24 @@
 require "TimedActions/ISBaseTimedAction"
 
-ISDigStoneAction = ISBaseTimedAction:derive("ISDigStoneAction");
+ISQuarryStoneAction = ISBaseTimedAction:derive("ISQuarryStoneAction");
 
-local DigStoneRewards = {
+local QuarryStoneRewards = {
 	{ item = "Base.Stone2", 		chance = 0.95 },
 	{ item = "Base.Clay", 			chance = 0.20 },
 	{ item = "Base.SharpenedStone", chance = 0.10 },
 	{ item = "Base.IronOre", 		chance = 0.05 },
 }
 
-function ISDigStoneAction:isValid()
+function ISQuarryStoneAction:isValid()
 	if isClient() then
 		-- Check inventory space.
 		local inventory = self.character:getInventory()
 		if inventory:getCapacityWeight() >= inventory:getCapacity() then
 			return false
-		-- Check player still has valid shovel in inventory.
+		-- Check player still has valid pickaxe in inventory.
 		elseif self.item then
 			return 	self.character:getInventory():containsID(self.item:getID()) and
-				self.item:hasTag(ItemTag.DIG_GRAVE) and
+				self.item:hasTag(ItemTag.PICK_AXE) and
 				not self.item:isBroken();
 		end
 	else
@@ -26,34 +26,35 @@ function ISDigStoneAction:isValid()
 	end
 end
 
-function ISDigStoneAction:waitToStart()
-	-- Turn towards the Digging Pit
+function ISQuarryStoneAction:waitToStart()
+	-- Turn towards the Quarryging Pit
 	self.character:faceThisObject(self.entity)
 	-- Wait until it returns False
 	return self.character:isTurning() or self.character:shouldBeTurning()
 end
 
-function ISDigStoneAction:start()
+function ISQuarryStoneAction:start()
 	if isClient() and self.item then
         self.item = self.character:getInventory():getItemById(self.item:getID())
     end
-	-- Inventory green bar on the digging tool to show progress
+	-- Inventory green bar on the Quarryging tool to show progress
 	if self.item then
-        self.item:setJobType(getText("ContextMenu_DigStone"));
+        self.item:setJobType(getText("ContextMenu_QuarryStone"));
         self.item:setJobDelta(0.0);
 	end
 	-- Role-play time
-	self:setActionAnim(BuildingHelper.getShovelAnim(self.item));
+	self:setActionAnim("DestroyFloor");
 	self:setOverrideHandModels(self.item, nil);
-	self.sound = self.character:playSound("Shoveling");	
+	addSound(self.character, self.character:getX(),self.character:getY(),self.character:getZ(), 20, 10);
+	--self.sound = self.character:playSound("Shoveling");	
 end
 
-function ISDigStoneAction:update()
+function ISQuarryStoneAction:update()
 	-- Called every game tick
-	-- Make sure the player is still facing the Digging Pit
+	-- Make sure the player is still facing the Quarryging Pit
 	self.character:faceThisObject(self.entity)
 	-- Put your back into it >:)
-	self.character:setMetabolicTarget(Metabolics.DiggingSpade);
+	self.character:setMetabolicTarget(Metabolics.HeavyWork);
     local skill = self.character:getPerkLevel(Perks.Strength)
     local strain = (1 - (skill * 0.05))/10 * getGameTime():getMultiplier()
     if self.item then
@@ -62,7 +63,7 @@ function ISDigStoneAction:update()
     end
 end
 
-function ISDigStoneAction:stop()
+function ISQuarryStoneAction:stop()
 	-- Interrupted
 	self.character:stopOrTriggerSound(self.sound)
     ISBaseTimedAction.stop(self)
@@ -71,30 +72,37 @@ function ISDigStoneAction:stop()
     end
 end
 
-function ISDigStoneAction:perform()
+function ISQuarryStoneAction:perform()
 	--- Finished
-	self.character:stopOrTriggerSound(self.sound)
+	--self.character:stopOrTriggerSound(self.sound)
 	if self.item then
         self.item:getContainer():setDrawDirty(true); -- Makes the character dirty
         self.item:setJobDelta(0.0);
-    end	
+    end
+	self.character:playSound("CraftMineralDepositRemove")
 	ISBaseTimedAction.perform(self); -- Unqueue and log
 end
 
-function ISDigStoneAction:complete()
+function ISQuarryStoneAction:complete()
+	-- Spawn reward in inventory or on the world
+	local rewardInventory = false
 	-- Roll for rewards
-	for _, reward in ipairs(DigStoneRewards) do
+	for _, reward in ipairs(QuarryStoneRewards) do
 		if ZombRandFloat(0, 1) <= reward.chance then
-			self.character:getInventory():AddItem(reward.item)
+			if rewardInventory then
+				self.character:getInventory():AddItem(reward.item)
+			else
+				self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
+			end
 		end
 	end
 end
 
-function ISDigStoneAction:new (character, entity, shovel)
+function ISQuarryStoneAction:new (character, entity, pickaxe)
 	local o = ISBaseTimedAction.new(self, character)
 	o.character = character;
 	o.entity = entity
-	o.item = shovel;
+	o.item = pickaxe;
 	o.maxTime = 100;
 	o.stopOnWalk = true;
 	o.stopOnRun = true;

@@ -12,14 +12,6 @@ module Base
         {
             Recipes = MyRecipeTag,
         }
-		component ContextMenuConfig
-        {
-            contextEntry
-			{
-				menu = DiggingPit,
-				customSubmenu = ContextMenuCode.DiggingPitMenu,
-			}
-        }
         component SpriteConfig
         {
 			isThumpable = false,

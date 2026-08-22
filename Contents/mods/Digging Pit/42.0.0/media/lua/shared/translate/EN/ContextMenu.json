@@ -2,5 +2,8 @@
 	"ContextMenu_DiggingPit": 	"Digging pit",
 	"ContextMenu_DigDirt": 	"Dig dirt",
 	"ContextMenu_DigStone": 	"Dig for stone",
-	"ContextMenu_QuarryStone": 	"Quarry stone"
+	"ContextMenu_QuarryStone": 	"Quarry stone",
+	"ContextMenu_NeedShovel": "You need a shovel",
+	"ContextMenu_NeedPickaxe": "You need a pickaxe",
+	"ContextMenu_TooTiredForDiggingPit": "You are too tired"
 }
