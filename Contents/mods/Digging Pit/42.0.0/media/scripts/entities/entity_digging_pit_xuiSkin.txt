@@ -1,0 +1,12 @@
+module Base
+{
+    xuiSkin default
+    {
+        entity ES_Digging_Pit
+        {
+            LuaWindowClass = ISEntityWindow,
+            DisplayName = Digging Pit,
+            Icon = Build_Coalpit,
+        }
+    }
+}

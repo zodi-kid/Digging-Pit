@@ -1,0 +1,10 @@
+module Base
+{
+    timedAction Dig
+    {
+        metabolics = HeavyWork,
+        actionAnim = DigShovel,
+        sound = Shoveling,
+        prop1 = Base.Shovel,
+    }
+}

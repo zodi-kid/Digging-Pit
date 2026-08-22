@@ -1,0 +1,18 @@
+module Base
+{
+    craftRecipe MyRecipe
+    {
+        time = 100,
+        timedAction = Dig,
+        Tags = MyRecipeTag,
+        inputs
+        {
+            item 1 tags[base:diggrave] mode:keep flags[MayDegradeLight],
+			item 1 tags[base:holddirt],			
+        }
+        outputs
+        {
+            item 12 Base.Dirtbag,
+        }
+    }
+}

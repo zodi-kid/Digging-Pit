@@ -1,0 +1,10 @@
+name=Digging Pit
+id=zodi_digging_pit
+description=Lorem ipsum.
+author=Zodi_Kid
+poster=poster.png
+icon=icon.png
+modversion=1.00
+versionMin=42.0
+pack=digging_pit
+tiledef=digging_pit 4798

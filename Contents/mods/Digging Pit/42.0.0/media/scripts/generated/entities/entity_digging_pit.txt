@@ -1,0 +1,47 @@
+module Base
+{
+    entity Digging Pit
+    {
+        component UiConfig
+        {
+            xuiSkin = default,
+            entityStyle = ES_Digging_Pit,
+            uiEnabled = true,
+        }
+		component CraftBench
+        {
+            Recipes = MyRecipeTag,
+        }
+		component ContextMenuConfig
+        {
+            contextEntry
+			{
+				menu = DiggingPit,
+				customSubmenu = ContextMenuCode.DiggingPitMenu,
+			}
+        }
+        component SpriteConfig
+        {
+			isThumpable = false,
+            face SINGLE
+            {
+                layer
+                {
+                    row = digging_pit_1 digging_pit_3,
+                    row = digging_pit_0 digging_pit_2,
+                }
+            }
+        }
+        component CraftRecipe
+        {
+            timedAction = Dig,
+            time = 200,
+            category = Outdoors,
+            Tooltip = Tooltip_craft_digging_pit,
+            inputs
+            {
+                item 1 tags[base:diggrave] mode:keep flags[Prop1;MayDegradeLight],
+            }
+        }
+    }
+}
