@@ -10,7 +10,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 		end
 	)
 	-- Same for a pickaxe
-	local pick = character:getInventory():getFirstEvalRecurse(
+	local pickaxe = character:getInventory():getFirstEvalRecurse(
 		function(item)
 			return not item:isBroken() and item:hasTag(ItemTag.PICK_AXE)
 		end
@@ -20,7 +20,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 	local optionDigDirt = context:addOption(getText("ContextMenu_DigDirt"), nil,
 			function() -- I hate all these callbacks
 				if luautils.walkAdj(character, entity:getSquare(), false) then
-					ISTimedActionQueue.add(ISDigDirtAction:new(character, entity, shovel)
+					ISTimedActionQueue.add(ISDigDirtAction:new(character, entity, shovel))
 				end
 			end
 	)
@@ -28,7 +28,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 	local optionDigStone = context:addOption(getText("ContextMenu_DigStone"), nil,
 		function()
 			if luautils.walkAdj(character, entity:getSquare(), false) then
-				ISTimedActionQueue.add(ISDigStoneAction:new(character, entity, shovel)
+				ISTimedActionQueue.add(ISDigStoneAction:new(character, entity, shovel))
 			end
 		end
 	)
@@ -36,7 +36,7 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 	local optionQuarryStone = context:addOption(getText("ContextMenu_QuarryStone"), nil,
 		function() -- I still do
 			if luautils.walkAdj(character, entity:getSquare(), false) then
-				ISTimedActionQueue.add(ISQuarryStoneAction:new(character, entity, pickaxe)
+				ISTimedActionQueue.add(ISQuarryStoneAction:new(character, entity, pickaxe))
 			end
 		end
 	)
@@ -56,4 +56,4 @@ function ContextMenuCode.DiggingPitMenu(context, entity, character, param)
 		optionQuarryStone.toolTip = ISWorldObjectContextMenu.addToolTip();
 		optionQuarryStone.toolTip.description = getText("ContextMenu_No_Fuel");
 	end	
-)
+end
