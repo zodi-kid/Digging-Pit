@@ -10,20 +10,37 @@ local QuarryStoneRewards = {
 }
 
 function ISQuarryStoneAction:isValid()
+	-- Check tool is not null
+	if not self.item then
+		return false
+	end
+	-- Check tool is non-broken, and correct type
+	if self.item:isBroken() or not self.item:hasTag(ItemTag.PICK_AXE) then
+		return false
+	end
+	-- Check player has tool
 	if isClient() then
-		-- Check inventory space.
-		local inventory = self.character:getInventory()
-		if inventory:getCapacityWeight() >= inventory:getCapacity() then
+		if not self.character:getInventory():containsID(self.item:getID()) then
 			return false
-		-- Check player still has valid pickaxe in inventory.
-		elseif self.item then
-			return 	self.character:getInventory():containsID(self.item:getID()) and
-				self.item:hasTag(ItemTag.PICK_AXE) and
-				not self.item:isBroken();
 		end
 	else
-		return true
+		if not self.character:getInventory():contains(self.item) then
+			return false
+		end
 	end
+	
+	-- Check if player is standing opposite of the tile
+	if not diggingpitutils.isOnOppositeSquare(self.character, entity) then
+		return false
+	end
+	
+	-- Check inventory space
+	--local inventory = self.character:getInventory()
+	--if inventory:getCapacityWeight() < inventory:getCapacity() then
+		--return false
+	--end
+	
+	return true
 end
 
 function ISQuarryStoneAction:waitToStart()
@@ -66,7 +83,7 @@ end
 
 function ISQuarryStoneAction:stop()
 	-- Interrupted
-	self.character:stopOrTriggerSound(self.sound)
+	--self.character:stopOrTriggerSound(self.sound)
     ISBaseTimedAction.stop(self)
 	if self.item then
         self.item:setJobDelta(0.0);

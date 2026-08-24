@@ -1,5 +1,12 @@
 diggingpitutils = {};
 
+local OppositeDirectionTable = {
+	{ spriteName = "digging_pit_0", direction = IsoDirections.NE },
+	{ spriteName = "digging_pit_1", direction = IsoDirections.SE },
+	{ spriteName = "digging_pit_2", direction = IsoDirections.NW },
+	{ spriteName = "digging_pit_3", direction = IsoDirections.SW },
+}
+
 function diggingpitutils.findOppositeSquare(entity)
 	-- Give me something good
 	if not entity or not entity:getSquare() or not entity:getSprite() then
@@ -32,7 +39,7 @@ function diggingpitutils.walkToOppositeSquare(playerObj, entity)
 	-- Give me something good
 	if not entity then return false end
 	
-	local destinationSquare = DiggingPitMenu.findOppositeSquare(entity)
+	local destinationSquare = diggingpitutils.findOppositeSquare(entity)
 	
 	if not destinationSquare then return false end
 	
@@ -49,7 +56,7 @@ function diggingpitutils.isOnOppositeSquare(playerObj, entity)
 	-- Give me something good
 	if not entity then return false end
 	
-	local destinationSquare = DiggingPitMenu.findOppositeSquare(entity)
+	local destinationSquare = diggingpitutils.findOppositeSquare(entity)
 	
 	if not destinationSquare then return false end
 	

@@ -1,0 +1,12 @@
+[X]Detect if the player is standing on the right tile in isValid()
+[]Make it deletable
+[]Implement DigDirt Action
+[]Refresh World inventory after gathering Stone
+[]Set the time of every action according to the length of the animation
+[]Configure stamina drain
+[]Configure dirtiness
+[]Configure durability loss
+[]Building icon
+[]Context menu icon
+[]See if building can be limited to grass/dirt/natural_blends
+[]Consider adding strength/fitness XP for digging/quarrying

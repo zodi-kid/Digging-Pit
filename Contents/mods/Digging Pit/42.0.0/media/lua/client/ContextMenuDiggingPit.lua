@@ -1,12 +1,5 @@
 DiggingPitMenu = {}
 
-local OppositeDirectionTable = {
-	{ spriteName = "digging_pit_0", direction = IsoDirections.NE },
-	{ spriteName = "digging_pit_1", direction = IsoDirections.SE },
-	{ spriteName = "digging_pit_2", direction = IsoDirections.NW },
-	{ spriteName = "digging_pit_3", direction = IsoDirections.SW },
-}
-
 function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjects, test)
 	-- Copied from game code, I guess it is a sanity check
 	if test and ISWorldObjectContextMenu.Test then return true end

@@ -28,6 +28,12 @@ function ISDigStoneAction:isValid()
 			return false
 		end
 	end
+	
+	-- Check if player is standing opposite of the tile
+	if not diggingpitutils.isOnOppositeSquare(self.character, entity) then
+		return false
+	end
+
 	-- Check inventory space
 	--local inventory = self.character:getInventory()
 	--if inventory:getCapacityWeight() < inventory:getCapacity() then
