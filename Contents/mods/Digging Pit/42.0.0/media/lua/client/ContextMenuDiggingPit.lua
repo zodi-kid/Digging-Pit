@@ -1,7 +1,3 @@
---if not ContextMenuCode then
---    ContextMenuCode = {}
---end
-
 DiggingPitMenu = {}
 
 local OppositeDirectionTable = {
@@ -12,7 +8,6 @@ local OppositeDirectionTable = {
 }
 
 function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjects, test)
-	--print("Context menu script successfully ran")
 	-- Copied from game code, I guess it is a sanity check
 	if test and ISWorldObjectContextMenu.Test then return true end
 	
@@ -25,16 +20,14 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	local diggingPitFound = false
 	for _, obj in ipairs(worldobjects) do
 		if obj and obj:getSprite() then
-			-- Really unsure how to identify the tile; using fallback with tilename just in case
+			-- Find the tile. By name seems robust enough, but also check spriteName just in case
 			if obj:getName() == "Digging Pit" then
-				--diggingPitFound = true
 				entity = obj
 				break
 			elseif obj:getSprite():getName():find("digging_pit_0")
 				or obj:getSprite():getName():find("digging_pit_1")
 				or obj:getSprite():getName():find("digging_pit_2")
 				or obj:getSprite():getName():find("digging_pit_3") then
-				--diggingPitFound = true
 				entity = obj
 				break
 			end
@@ -42,13 +35,11 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	end
 	
 	-- No Digging Pit, no context menu options
-	--if not diggingPitFound then return false end
 	if not entity then return false end
 
 	-- ???
 	if test then return ISWorldObjectContextMenu.setTest() end
 	
-	--local entity = worldobjects[1] -- For convenience sake
 	
 	-- Create Main Option
 	local DiggingPitOption = context:addOption(getText("ContextMenu_DiggingPit"), worldobjects, nil)
@@ -72,17 +63,15 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	
 	-- Each option and its associated action
 	local optionDigDirt = DiggingPitSubMenu:addOption(getText("ContextMenu_DigDirt"), nil,
-			function() -- I hate all these callbacks
-				--if luautils.walkAdj(playerObj, entity:getSquare(), false) then
-				if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
-					ISTimedActionQueue.add(ISDigDirtAction:new(playerObj, entity, shovel))
-				end
+		function() -- I hate all these callbacks
+			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
+				ISTimedActionQueue.add(ISDigDirtAction:new(playerObj, entity, shovel))
 			end
+		end
 	)
 	
 	local optionDigStone = DiggingPitSubMenu:addOption(getText("ContextMenu_DigStone"), nil,
 		function()
-			--if luautils.walkAdj(playerObj, entity:getSquare(), false) then
 			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
 				ISTimedActionQueue.add(ISDigStoneAction:new(playerObj, entity, shovel))
 			end
@@ -91,7 +80,6 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	
 	local optionQuarryStone = DiggingPitSubMenu:addOption(getText("ContextMenu_QuarryStone"), nil,
 		function() -- I still hate them
-			--if luautils.walkAdj(playerObj, entity:getSquare(), false) then
 			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
 				ISTimedActionQueue.add(ISQuarryStoneAction:new(playerObj, entity, pickaxe))
 			end
@@ -149,82 +137,3 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 end
 
 Events.OnFillWorldObjectContextMenu.Add(DiggingPitMenu.OnFillWorldObjectContextMenu)
-
-function DiggingPitMenu.walkToOpposite(playerObj, entity)
-	-- Give me something good
-	if not entity or not entity:getSquare() or not entity:getSprite() then
-		return false
-	end
-	
-	local spriteName = entity:getSprite():getName()	
-	local oppositeDirection = IsoDirections.NW -- Fallback value
-	
-	-- Find the opposite direction, to move there
-	for _, sprites in ipairs(OppositeDirectionTable) do
-		if sprites.spriteName == spriteName then
-			oppositeDirection = sprites.direction
-			break
-		end
-	end
-	
-	local targetSquare = entity:getSquare()
-	local destinationSquare = targetSquare:getAdjacentSquare(oppositeDirection)
-	
-	-- Sanity check
-	if not destinationSquare then return false end
-	
-	if destinationSquare == playerObj:getSquare() then
-		-- No walk if already on the spot
-		return true
-	else
-		-- Walk to tile in front of digging target
-		return ISTimedActionQueue.add(ISWalkToTimedAction:new(playerObj, destinationSquare))
-	end
-end
-
-function DiggingPitMenu.findOppositeSquare(entity)
-	-- Give me something good
-	if not entity or not entity:getSquare() or not entity:getSprite() then
-		return false
-	end
-	
-	local spriteName = entity:getSprite():getName()	
-	local oppositeDirection = IsoDirections.NW -- Fallback value
-	
-	-- Find the opposite direction, to move there
-	for _, sprites in ipairs(OppositeDirectionTable) do
-		if sprites.spriteName == spriteName then
-			oppositeDirection = sprites.direction
-			break
-		end
-	end
-	
-	local targetSquare = entity:getSquare()
-	local destinationSquare = targetSquare:getAdjacentSquare(oppositeDirection)
-	
-	-- Sanity check
-	if not destinationSquare then
-		return false
-	else
-		return destinationSquare
-	end
-end
-
-
-
-function DiggingPitMenu.walkToOppositeSquare(playerObj, entity)
-	-- Give me something good
-	if not entity then return false end
-	
-	local destinationSquare = DiggingPitMenu.findOppositeSquare(entity)
-	
-	if not destinationSquare then return false end
-	
-	if destinationSquare == playerObj:getSquare() then
-		-- No walk if already on the spot
-		return true
-	else
-		-- Walk to tile in front of digging target
-		return ISTimedActionQueue.add(ISWalkToTimedAction:new(playerObj, destinationSquare))
-	end
-end

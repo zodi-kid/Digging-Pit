@@ -8,10 +8,6 @@ module Base
             entityStyle = ES_Digging_Pit,
             uiEnabled = true,
         }
-		component CraftBench
-        {
-            Recipes = MyRecipeTag,
-        }
         component SpriteConfig
         {
 			isThumpable = false,

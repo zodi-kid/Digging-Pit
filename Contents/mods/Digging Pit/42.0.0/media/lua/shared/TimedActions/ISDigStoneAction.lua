@@ -40,7 +40,6 @@ end
 function ISDigStoneAction:waitToStart()
 	-- Turn towards the Digging Pit
 	self.character:faceThisObject(self.entity)
-	--print(self.entity:getSprite():getName())
 	-- Wait until it returns False
 	return self.character:isTurning() or self.character:shouldBeTurning()
 end
@@ -66,6 +65,8 @@ function ISDigStoneAction:update()
 	-- Make sure the player is still facing the Digging Pit
 	self.character:faceThisObject(self.entity)
 	-- Put your back into it >:)
+	
+	--CURRENTLY, IT DOES NOT SEEM TO DRAIN STAMINA
 	--self.character:setMetabolicTarget(Metabolics.DiggingSpade);
 	self.character:setMetabolicTarget(Metabolics.FitnessHeavy);
     local skill = self.character:getPerkLevel(Perks.Strength)
@@ -89,7 +90,6 @@ function ISDigStoneAction:perform()
 	--- Finished
 	self.character:stopOrTriggerSound(self.sound)
 	if self.item then
-        --self.item:getContainer():setDrawDirty(true); -- Refreshes inventory
         self.item:setJobDelta(0.0);
     end
 	
@@ -132,10 +132,9 @@ function ISDigStoneAction:new (character, entity, shovel)
 	o.character = character;
 	o.entity = entity
 	o.item = shovel;
-	o.maxTime = 200;
+	o.maxTime = 180;
 	o.stopOnWalk = true;
 	o.stopOnRun = true;
 	o.stopOnAim = true;
-    --o.caloriesModifier = 1;
 	return o
 end

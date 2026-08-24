@@ -120,6 +120,5 @@ function ISQuarryStoneAction:new (character, entity, pickaxe)
 	o.stopOnWalk = true;
 	o.stopOnRun = true;
 	o.stopOnAim = true;
-    --o.caloriesModifier = 1;
 	return o
 end
