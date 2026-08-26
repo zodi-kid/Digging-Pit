@@ -80,22 +80,22 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	)
 	
 	-- If the player is too tired, disable the action and add a tooltip to let them know
-	if playerObj:getMoodles():getMoodleLevel(MoodleType.ENDURANCE) > 2 then
+	if diggingpitutils.isPlayerTooExhausted(playerObj) then
 		optionDigDirt.notAvailable = true;
 		optionDigDirt.toolTip = ISWorldObjectContextMenu.addToolTip();
-		optionDigDirt.toolTip.description = getText("ContextMenu_TooTiredForDiggingPit");
+		optionDigDirt.toolTip.description = getText("ContextMenu_TooExhaustedForDiggingPit");
 		
 		optionDigStone.notAvailable = true;
 		optionDigStone.toolTip = ISWorldObjectContextMenu.addToolTip();
-		optionDigStone.toolTip.description = getText("ContextMenu_TooTiredForDiggingPit");
+		optionDigStone.toolTip.description = getText("ContextMenu_TooExhaustedForDiggingPit");
 		
 		optionQuarryStone.notAvailable = true;
 		optionQuarryStone.toolTip = ISWorldObjectContextMenu.addToolTip();
-		optionQuarryStone.toolTip.description = getText("ContextMenu_TooTiredForDiggingPit");
+		optionQuarryStone.toolTip.description = getText("ContextMenu_TooExhaustedForDiggingPit");
 	end
 	
 	-- If the player is in too much pain, disable the action and add a tooltip to let them know
-	if playerObj:getMoodles():getMoodleLevel(MoodleType.PAIN) > 3 then
+	if diggingpitutils.isPlayerTooPained(playerObj) then
 		optionDigDirt.notAvailable = true;
 		optionDigDirt.toolTip = ISWorldObjectContextMenu.addToolTip();
 		optionDigDirt.toolTip.description = getText("ContextMenu_TooMuchPainForDiggingPit");

@@ -68,3 +68,16 @@ function diggingpitutils.isOnOppositeSquare(playerObj, entity)
 		return false
 	end
 end
+
+function diggingpitutils.isPlayerTooTired(playerObj)
+	return playerObj:getMoodles():getMoodleLevel(MoodleType.TIRED) > 3
+end
+
+function diggingpitutils.isPlayerTooExhausted(playerObj)
+	return playerObj:getMoodles():getMoodleLevel(MoodleType.ENDURANCE) > 2
+end
+
+function diggingpitutils.isPlayerTooPained(playerObj)
+	return playerObj:getMoodles():getMoodleLevel(MoodleType.PAIN) > 3
+end
+

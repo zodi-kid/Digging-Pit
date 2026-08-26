@@ -6,5 +6,6 @@
 	"ContextMenu_NeedShovel": "You need a shovel",
 	"ContextMenu_NeedPickaxe": "You need a pickaxe",
 	"ContextMenu_TooTiredForDiggingPit": "You are too tired",
+	"ContextMenu_TooExhaustedForDiggingPit": "You are too exhausted",
 	"ContextMenu_TooMuchPainForDiggingPit": "You are experiencing too much pain",
 }
