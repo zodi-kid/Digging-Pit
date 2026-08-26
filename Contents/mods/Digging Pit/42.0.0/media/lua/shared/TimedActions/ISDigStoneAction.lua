@@ -5,28 +5,36 @@ ISDigStoneAction = ISBaseTimedAction:derive("ISDigStoneAction");
 local DigStoneRewards = {
 	{ item = "Base.Stone2", 		chance = 0.95 },
 	{ item = "Base.Clay", 			chance = 0.20 },
-	{ item = "Base.SharpedStone", chance = 0.10 },
+	{ item = "Base.SharpedStone", 	chance = 0.10 },
 	{ item = "Base.IronOre", 		chance = 0.05 },
 }
 
 function ISDigStoneAction:isValid()
 	-- Check tool is not null
-	if not self.item then
+	if not self.tool then
 		return false
 	end
 	-- Check tool is non-broken, and correct type
-	if self.item:isBroken() or not self.item:hasTag(ItemTag.DIG_GRAVE) then
+	if self.tool:isBroken() or not self.tool:hasTag(ItemTag.DIG_GRAVE) then
 		return false
 	end
 	-- Check player has tool
 	if isClient() then
-		if not self.character:getInventory():containsID(self.item:getID()) then
+		if not self.character:getInventory():containsID(self.tool:getID()) then
 			return false
 		end
 	else
-		if not self.character:getInventory():contains(self.item) then
+		if not self.character:getInventory():contains(self.tool) then
 			return false
 		end
+	end
+	
+	if diggingpitutils.isPlayerTooExhausted(self.character) then
+		return false
+	end
+	
+	if diggingpitutils.isPlayerTooPained(self.character) then
+		return false
 	end
 	
 	-- Check if player is standing opposite of the tile
@@ -40,6 +48,7 @@ function ISDigStoneAction:isValid()
 		--return false
 	--end
 	
+	-- If no condition to return false is met, the action is Valid
 	return true
 end
 
@@ -51,35 +60,73 @@ function ISDigStoneAction:waitToStart()
 end
 
 function ISDigStoneAction:start()
-	if isClient() and self.item then
-        self.item = self.character:getInventory():getItemById(self.item:getID())
+	if isClient() and self.tool then
+        self.tool = self.character:getInventory():getItemById(self.tool:getID())
     end
 	-- Inventory green bar on the digging tool to show progress
-	if self.item then
-        self.item:setJobType(getText("ContextMenu_DigStone"));
-        self.item:setJobDelta(0.0);
+	if self.tool then
+        self.tool:setJobType(self.text);
+        self.tool:setJobDelta(0.0);
 	end
 	-- Role-play time
-	self:setActionAnim(BuildingHelper.getShovelAnim(self.item));
-	self:setOverrideHandModels(self.item, nil);
-	self.sound = self.character:playSound("Shoveling");
+	--self:setActionAnim(BuildingHelper.getShovelAnim(self.tool));
+	self:setActionAnim(self.animName);
+	self:setOverrideHandModels(self.tool, nil);
+	self.sound = self.character:playSound(self.soundProgress);
 	addSound(self.character, self.character:getX(), self.character:getY(), self.character:getZ(), 10, 1)
+end
+
+function ISDigStoneAction:serverStart()
+	--self.item = self.character:getPrimaryHandItem()
+	self.tool = self.character:getInventory():getItemById(self.tool:getID())
+	emulateAnimEvent(self.netAction, self.maxTime, self.eventName, nil)
+end
+
+-- Server side computing: changes to character, items, etc.
+function ISDigStoneAction:animEvent(event, parameter)
+	if not isClient() then
+		print("Checking for eventName")
+		if event == self.eventName then -- THIS CHECK ALWAYS FAILS
+			print("eventName check PASSED")
+			if self.tool then -- Sanity check
+				-- Tool durability loss check
+				if self.tool:damageCheck(0, 2, false) then
+					ISWorldObjectContextMenu.checkWeapon(self.character)
+				end
+				-- Muscle strain
+				local skill = self.character:getPerkLevel(Perks.Strength)
+				local strain = (1 - (skill * 0.05))/10 * getGameTime():getMultiplier()
+				self.character:addCombatMuscleStrain(self.tool, 1, strain)
+			end
+			-- Put your back into it >:)
+			self.character:setMetabolicTarget(Metabolics.DiggingSpade);
+			self:useEndurance()
+		end
+	end
+end
+
+function ISDigStoneAction:useEndurance()
+	print("Using endurance")
+	if self.tool then
+		local fatigue = self.tool:getWeight()
+			* self.tool:getFatigueMod(self.character)
+			* self.tool:getEnduranceMod()
+			* self.character:getFatigueMod()
+			* 0.1
+		local balanceFactor = 0.041 -- used to fine-tune endurance draining
+		fatigue = fatigue * balanceFactor
+		self.character:getStats():remove(CharacterStat.ENDURANCE, fatigue)
+		print("Endurance used")
+	end
 end
 
 function ISDigStoneAction:update()
 	-- Called every game tick
 	-- Make sure the player is still facing the Digging Pit
 	self.character:faceThisObject(self.entity)
-	-- Put your back into it >:)
-	
-	--CURRENTLY, IT DOES NOT SEEM TO DRAIN STAMINA
-	--self.character:setMetabolicTarget(Metabolics.DiggingSpade);
-	self.character:setMetabolicTarget(Metabolics.FitnessHeavy);
-    local skill = self.character:getPerkLevel(Perks.Strength)
-    local strain = (1 - (skill * 0.05))/10 * getGameTime():getMultiplier()
-    if self.item then
-		self.item:setJobDelta(self:getJobDelta());
-        self.character:addCombatMuscleStrain(self.item, 1, strain)
+    if self.tool then
+		-- Progress bar
+		self.tool:setJobDelta(self:getJobDelta());
     end
 end
 
@@ -87,22 +134,22 @@ function ISDigStoneAction:stop()
 	-- Interrupted
 	self.character:stopOrTriggerSound(self.sound)
     ISBaseTimedAction.stop(self)
-	if self.item then
-        self.item:setJobDelta(0.0);
+	if self.tool then
+        self.tool:setJobDelta(0.0);
     end
 end
 
 function ISDigStoneAction:perform()
 	--- Finished
 	self.character:stopOrTriggerSound(self.sound)
-	if self.item then
-        self.item:setJobDelta(0.0);
+	if self.tool then
+        self.tool:setJobDelta(0.0);
     end
 	
 	-- Repeat the action, unless conditions unmet or player queues something else
 	local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
 	if #queue.queue == 1 and self:isValid() then
-		local nextAction = ISDigStoneAction:new(self.character, self.entity, self.item)
+		local nextAction = ISDigStoneAction:new(self.character, self.entity, self.tool)
 		ISTimedActionQueue.addAfter(self, nextAction)
 	end	
 	
@@ -110,6 +157,7 @@ function ISDigStoneAction:perform()
 end
 
 function ISDigStoneAction:complete()
+	-- Spawn reward in inventory or on the world
 	local rewardInventory = false
 	-- Roll for rewards
 	for _, reward in ipairs(DigStoneRewards) do
@@ -127,7 +175,7 @@ function ISDigStoneAction:complete()
 	-- I don't know if placing it outside the loop really helps performance
 	if rewardInventory then
 		-- refresh player inventory
-		self.item:getContainer():setDrawDirty(true);
+		self.tool:getContainer():setDrawDirty(true);
 	else
 		-- refresh world inventory
 	end
@@ -135,12 +183,17 @@ end
 
 function ISDigStoneAction:new (character, entity, shovel)
 	local o = ISBaseTimedAction.new(self, character)
-	o.character = character;
-	o.entity = entity
-	o.item = shovel;
-	o.maxTime = 180;
-	o.stopOnWalk = true;
-	o.stopOnRun = true;
-	o.stopOnAim = true;
-	return o
+	o.character 	= character;	-- Class: IsoGameCharacter
+	o.entity 		= entity 		-- Class: IsoObject
+	o.tool 			= shovel; 		-- Class: InventoryItem
+	o.maxTime 		= 1500;
+	o.eventName 	= "DiggingPit_DigStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
+	o.text 			= getText("ContextMenu_DigStone");
+	o.animName 		= "DiggingPit_DigStone"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
+	o.soundProgress = "Shoveling";
+	o.soundFinished = "";
+	o.stopOnWalk 	= true;
+	o.stopOnRun 	= true;
+	o.stopOnAim 	= true;
+	return o	
 end

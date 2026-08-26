@@ -5,7 +5,7 @@ ISQuarryStoneAction = ISBaseTimedAction:derive("ISQuarryStoneAction");
 local QuarryStoneRewards = {
 	{ item = "Base.Stone2", 		chance = 0.95 },
 	{ item = "Base.Clay", 			chance = 0.20 },
-	{ item = "Base.SharpedStone", chance = 0.10 },
+	{ item = "Base.SharpedStone", 	chance = 0.10 },
 	{ item = "Base.IronOre", 		chance = 0.05 },
 }
 
@@ -84,7 +84,6 @@ end
 -- Server side computing: changes to character, items, etc.
 function ISQuarryStoneAction:animEvent(event, parameter)
 	if not isClient() then
-		if not event then print("No event") end
 		if event == self.eventName then -- THIS CHECK ALWAYS FAILS
 			if self.tool then -- Sanity check
 				-- Tool durability loss check
@@ -118,7 +117,7 @@ end
 
 function ISQuarryStoneAction:update()
 	-- Called every game tick
-	-- Make sure the player is still facing the Quarryging Pit
+	-- Make sure the player is still facing the Digging Pit
 	self.character:faceThisObject(self.entity)
     if self.tool then
 		-- Progress bar
