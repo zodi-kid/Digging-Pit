@@ -11,7 +11,7 @@ module Base
         component SpriteConfig
         {
 			isThumpable = false,
-			OnIsValid = DiggingPitBuild.OnIsValid,
+			OnIsValid = diggingpitutils.IsTileDirt,
             face SINGLE
             {
                 layer

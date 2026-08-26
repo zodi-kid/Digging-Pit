@@ -81,3 +81,7 @@ function diggingpitutils.isPlayerTooPained(playerObj)
 	return playerObj:getMoodles():getMoodleLevel(MoodleType.PAIN) > 3
 end
 
+function diggingpitutils.IsTileDirt(params)
+    return ISShovelGroundCursor.GetDirtGravelSand(params.square) == "dirt"
+end
+
