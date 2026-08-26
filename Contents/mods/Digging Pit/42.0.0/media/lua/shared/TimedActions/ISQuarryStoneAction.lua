@@ -154,32 +154,26 @@ function ISQuarryStoneAction:perform()
 end
 
 function ISQuarryStoneAction:complete()
-	-- Spawn reward in inventory or on the world
-	local rewardInventory = false
 	-- Roll for rewards
 	for _, reward in ipairs(QuarryStoneRewards) do
 		if ZombRandFloat(0, 1) <= reward.chance then
-			if rewardInventory then
-				local rewardItem = self.character:getInventory():AddItem(reward.item)
-				if rewardItem then
-					sendAddItemToContainer(self.character:getInventory(), rewardItem)
-				end
-			else
-				self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
-			end
+			-- Spawn reward on the world
+			self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
 		end
 	end
+	-- reloads world inventory
+	triggerEvent("OnContainerUpdate", self.character:getSquare())
 end
 
 function ISQuarryStoneAction:new (character, entity, pickaxe)
 	local o = ISBaseTimedAction.new(self, character)
-	o.character 	= character;	-- Class: IsoGameCharacter
+	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
-	o.tool 			= pickaxe; 		-- Class: InventoryItem
+	o.tool 			= pickaxe; 		-- Class: HandWeapon, extends InventoryItem
 	o.maxTime 		= 1500;
-	o.eventName 	= "DiggingPit_QuarryStoneEvent"; -- Has to match <m_EventName> from media/AnimSets/player/actions
+	o.eventName 	= "DiggingPit_QuarryStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_QuarryStone");
-	o.animName 		= "DiggingPit_QuarryStone"; -- Has to match <m_Name> from media/AnimSets/player/actions
+	o.animName 		= "DiggingPit_QuarryStone"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
 	o.soundProgress = "";
 	o.soundFinished = "CraftMineralDepositRemove";
 	o.stopOnWalk 	= true;

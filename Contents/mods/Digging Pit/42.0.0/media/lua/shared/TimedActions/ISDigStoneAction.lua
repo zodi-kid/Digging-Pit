@@ -85,7 +85,6 @@ end
 -- Server side computing: changes to character, items, etc.
 function ISDigStoneAction:animEvent(event, parameter)
 	if not isClient() then
-		print("Checking for eventName")
 		if event == self.eventName then -- THIS CHECK ALWAYS FAILS
 			print("eventName check PASSED")
 			if self.tool then -- Sanity check
@@ -106,7 +105,6 @@ function ISDigStoneAction:animEvent(event, parameter)
 end
 
 function ISDigStoneAction:useEndurance()
-	print("Using endurance")
 	if self.tool then
 		local fatigue = self.tool:getWeight()
 			* self.tool:getFatigueMod(self.character)
@@ -116,7 +114,6 @@ function ISDigStoneAction:useEndurance()
 		local balanceFactor = 0.041 -- used to fine-tune endurance draining
 		fatigue = fatigue * balanceFactor
 		self.character:getStats():remove(CharacterStat.ENDURANCE, fatigue)
-		print("Endurance used")
 	end
 end
 
@@ -157,35 +154,22 @@ function ISDigStoneAction:perform()
 end
 
 function ISDigStoneAction:complete()
-	-- Spawn reward in inventory or on the world
-	local rewardInventory = false
 	-- Roll for rewards
 	for _, reward in ipairs(DigStoneRewards) do
 		if ZombRandFloat(0, 1) <= reward.chance then
-			if rewardInventory then
-				local rewardItem = self.character:getInventory():AddItem(reward.item)
-				if rewardItem then
-					sendAddItemToContainer(self.character:getInventory(), rewardItem)
-				end
-			else
-				self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
-			end
+			-- Spawn reward on the world
+			self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
 		end
 	end
-	-- I don't know if placing it outside the loop really helps performance
-	if rewardInventory then
-		-- refresh player inventory
-		self.tool:getContainer():setDrawDirty(true);
-	else
-		-- refresh world inventory
-	end
+	-- reloads world inventory
+	triggerEvent("OnContainerUpdate", self.character:getSquare())
 end
 
 function ISDigStoneAction:new (character, entity, shovel)
 	local o = ISBaseTimedAction.new(self, character)
-	o.character 	= character;	-- Class: IsoGameCharacter
+	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
-	o.tool 			= shovel; 		-- Class: InventoryItem
+	o.tool 			= shovel; 		-- Class: HandWeapon, extends InventoryItem
 	o.maxTime 		= 1500;
 	o.eventName 	= "DiggingPit_DigStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_DigStone");
