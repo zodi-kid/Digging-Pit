@@ -10,7 +10,7 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	if playerObj:getVehicle() then return false end
 
 	-- Did the player click on a Digging Pit?
-	local diggingPitFound = false
+	local entity = false
 	for _, obj in ipairs(worldobjects) do
 		if obj and obj:getSprite() then
 			-- Find the tile. By name seems robust enough, but also check spriteName just in case
@@ -32,7 +32,6 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 
 	-- ???
 	if test then return ISWorldObjectContextMenu.setTest() end
-	
 	
 	-- Create Main Option
 	local DiggingPitOption = context:addOption(getText("ContextMenu_DiggingPit"), worldobjects, nil)

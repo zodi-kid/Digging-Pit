@@ -1,4 +1,5 @@
 [X]Detect if the player is standing on the right tile in isValid()
+[X]FIX CONTEXT MENU
 []Make it deletable
 []Implement DigDirt Action
 [X]Refresh World inventory after gathering Stone
@@ -8,7 +9,7 @@
 [X]Configure durability loss
 []Building icon
 []Context menu icon
-[]See if building can be limited to grass/dirt/natural_blends
+[X]See if building can be limited to grass/dirt/natural_blends
 []Consider adding strength/fitness XP for digging/quarrying
 []Balance rewards, fatigue, noise, etc.
 []Stress test it

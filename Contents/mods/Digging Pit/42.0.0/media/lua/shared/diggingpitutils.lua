@@ -10,7 +10,7 @@ local OppositeDirectionTable = {
 function diggingpitutils.findOppositeSquare(entity)
 	-- Give me something good
 	if not entity or not entity:getSquare() or not entity:getSprite() then
-		return false
+		return false -- :(
 	end
 	
 	local spriteName = entity:getSprite():getName()	
@@ -81,6 +81,7 @@ function diggingpitutils.isPlayerTooPained(playerObj)
 	return playerObj:getMoodles():getMoodleLevel(MoodleType.PAIN) > 3
 end
 
+-- Reuses the base-game logic to determine that a tile is not pavement, flooring, etc.
 function diggingpitutils.IsTileDirt(params)
     return ISShovelGroundCursor.GetDirtGravelSand(params.square) == "dirt"
 end
