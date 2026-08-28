@@ -38,7 +38,7 @@ function ISDigStoneAction:isValid()
 	end
 	
 	-- Check if player is standing opposite of the tile
-	if not diggingpitutils.isOnOppositeSquare(self.character, entity) then
+	if not diggingpitutils.isOnOppositeSquare(self.character, self.entity) then
 		return false
 	end
 
@@ -85,8 +85,7 @@ end
 -- Server side computing: changes to character, items, etc.
 function ISDigStoneAction:animEvent(event, parameter)
 	if not isClient() then
-		if event == self.eventName then -- THIS CHECK ALWAYS FAILS
-			print("eventName check PASSED")
+		if event == self.eventName then
 			if self.tool then -- Sanity check
 				-- Tool durability loss check
 				if self.tool:damageCheck(0, 2, false) then
