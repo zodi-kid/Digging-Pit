@@ -40,24 +40,29 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	local DiggingPitSubMenu = ISContextMenu:getNew(context)
 	context:addSubMenu(DiggingPitOption, DiggingPitSubMenu)
 
+	local playerInv = playerObj:getInventory()
+
 	-- Find and return digging tool from character inventory (item with DIG_GRAVE tag)
-	local shovel = playerObj:getInventory():getFirstEvalRecurse(
+	local shovel = playerInv:getFirstEvalRecurse(
 		function(item) -- I think this checks all items for the conditions, and returns the first true
 			return not item:isBroken() and item:hasTag(ItemTag.DIG_GRAVE)
 		end
 	)
 	-- Same for a pickaxe
-	local pickaxe = playerObj:getInventory():getFirstEvalRecurse(
+	local pickaxe = playerInv:getFirstEvalRecurse(
 		function(item)
 			return not item:isBroken() and item:hasTag(ItemTag.PICK_AXE)
 		end
-	)	
+	)
+
+	-- And for a valid sack
+	local _, sack = ISShovelGroundCursor.GetEmptyItem(playerObj, "dirt")
 	
 	-- Each option and its associated action
 	local optionDigDirt = DiggingPitSubMenu:addOption(getText("ContextMenu_DigDirt"), nil,
 		function() -- I hate all these callbacks
 			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
-				ISTimedActionQueue.add(ISDigDirtAction:new(playerObj, entity, shovel))
+				ISTimedActionQueue.add(ISDigDirtAction:new(playerObj, entity, shovel, sack))
 			end
 		end
 	)
@@ -123,6 +128,12 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 		optionQuarryStone.notAvailable = true;
 		optionQuarryStone.toolTip = ISWorldObjectContextMenu.addToolTip();
 		optionQuarryStone.toolTip.description = getText("ContextMenu_NeedPickaxe");
+	end
+	
+	if not sack then
+		optionDigDirt.notAvailable = true;
+		optionDigDirt.toolTip = ISWorldObjectContextMenu.addToolTip();
+		optionDigDirt.toolTip.description = getText("ContextMenu_NeedSack");
 	end
 	
 	return true

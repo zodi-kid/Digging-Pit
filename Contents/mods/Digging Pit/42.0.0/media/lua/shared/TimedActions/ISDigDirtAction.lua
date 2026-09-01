@@ -3,10 +3,11 @@ require "TimedActions/ISBaseTimedAction"
 ISDigDirtAction = ISBaseTimedAction:derive("ISDigDirtAction");
 
 local DigDirtRewards = {
-	{ item = "Base.Stone2", 		chance = 0.95 },
-	{ item = "Base.Clay", 			chance = 0.20 },
-	{ item = "Base.SharpedStone", 	chance = 0.10 },
-	{ item = "Base.IronOre", 		chance = 0.05 },
+	{ item = "Base.Stone2", 		chance = 0.05 },
+	{ item = "Base.Clay", 			chance = 0.10 },
+	{ item = "Base.SharpedStone", 	chance = 0.01 },
+	--{ item = "Base.IronOre", 		chance = 0.05 },
+	{ item = "Base.Worm", 			chance = 0.60 },
 }
 
 function ISDigDirtAction:isValid()
@@ -29,6 +30,39 @@ function ISDigDirtAction:isValid()
 		end
 	end
 	
+	-- Check bag is not null
+	if not self.emptyBag then
+		return false
+	end
+	
+	-- Check newBag too?
+	
+	-- Check bag is not used as container (and has items inside)
+	if instanceof(self.emptyBag, "InventoryContainer") then
+		if self.emptyBag:getInventory():isEmpty() == false then
+			return false
+		end
+	end
+	
+	-- Check player has valid bag in inventory
+	if isClient() then
+		-- Has bag
+		if not self.character:getInventory():containsID(self.emptyBag:getID()) then
+			return false
+		-- Bag is valid
+		elseif not (self.emptyBag:hasTag(ItemTag.HOLD_DIRT) or self.emptyBag:getCurrentUsesFloat() < 1) then
+			return false
+		end           
+    else
+		-- Has bag
+		if not self.character:getInventory():contains(self.emptyBag) then
+			return false
+		-- Bag is valid
+		elseif not (self.emptyBag:hasTag(ItemTag.HOLD_DIRT) or self.emptyBag:getCurrentUsesFloat() < 1) then
+			return false
+		end
+    end
+	
 	if diggingpitutils.isPlayerTooExhausted(self.character) then
 		return false
 	end
@@ -47,7 +81,7 @@ function ISDigDirtAction:isValid()
 	--if inventory:getCapacityWeight() < inventory:getCapacity() then
 		--return false
 	--end
-	
+
 	-- If no condition to return false is met, the action is Valid
 	return true
 end
@@ -63,10 +97,18 @@ function ISDigDirtAction:start()
 	if isClient() and self.tool then
         self.tool = self.character:getInventory():getItemById(self.tool:getID())
     end
+	if isClient() and self.emptyBag then
+        self.emptyBag = self.character:getInventory():getItemById(self.emptyBag:getID())
+    end
 	-- Inventory green bar on the digging tool to show progress
 	if self.tool then
         self.tool:setJobType(self.text);
         self.tool:setJobDelta(0.0);
+	end
+	-- Inventory green bar on the empty bag to show progress
+	if self.emptyBag then
+        self.emptyBag:setJobType(self.text);
+        --self.emptyBag:setJobDelta(0.0);
 	end
 	-- Role-play time
 	--self:setActionAnim(BuildingHelper.getShovelAnim(self.tool));
@@ -124,6 +166,10 @@ function ISDigDirtAction:update()
 		-- Progress bar
 		self.tool:setJobDelta(self:getJobDelta());
     end
+	if self.emptyBag then
+		-- Progress bar
+		self.emptyBag:setJobDelta(self:getJobDelta());
+    end
 end
 
 function ISDigDirtAction:stop()
@@ -133,6 +179,9 @@ function ISDigDirtAction:stop()
 	if self.tool then
         self.tool:setJobDelta(0.0);
     end
+	if self.emptyBag then
+        self.emptyBag:setJobDelta(0.0);
+    end
 end
 
 function ISDigDirtAction:perform()
@@ -141,18 +190,42 @@ function ISDigDirtAction:perform()
 	if self.tool then
         self.tool:setJobDelta(0.0);
     end
+	if self.emptyBag then
+		self.emptyBag:setJobDelta(0.0);
+	end
 	
 	-- Repeat the action, unless conditions unmet or player queues something else
-	local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
-	if #queue.queue == 1 and self:isValid() then
-		local nextAction = ISDigDirtAction:new(self.character, self.entity, self.tool)
-		ISTimedActionQueue.addAfter(self, nextAction)
-	end	
+	--local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
+	--if #queue.queue == 1 and self:isValid() then
+		--local nextAction = ISDigDirtAction:new(self.character, self.entity, self.tool)
+		--ISTimedActionQueue.addAfter(self, nextAction)
+	--end	
+	
+	getPlayerInventory(self.character:getPlayerNum()):refreshBackpacks();
+	getPlayerLoot(self.character:getPlayerNum()):refreshBackpacks();
 	
 	ISBaseTimedAction.perform(self); -- Unqueue and log
-end
+end	
 
 function ISDigDirtAction:complete()
+	-- Fill bag with dirt
+	print("[DiggingPit]:	Completed successfully")
+	-- emptyBag -> newBag
+	if self.emptyBag:hasTag(ItemTag.HOLD_DIRT) and (self.newBag == "Base.Dirtbag") then
+		self.character:removeFromHands(self.emptyBag);
+		-- Client-server handling of exchange
+		self.character:getInventory():Remove(self.emptyBag);
+		sendRemoveItemFromContainer(self.character:getInventory(), self.emptyBag);
+		local item = self.character:getInventory():AddItem(self.newBag);
+		sendAddItemToContainer(self.character:getInventory(), item);
+		item:setUsedDelta(item:getUseDelta())
+		sendItemStats(item)
+	-- (empty)Bag + dirt
+	elseif self.emptyBag:getCurrentUsesFloat() + self.emptyBag:getUseDelta() <= 1 then -- Should I floor it?
+		self.emptyBag:setUsedDelta(self.emptyBag:getCurrentUsesFloat() + self.emptyBag:getUseDelta())
+		sendItemStats(self.emptyBag)
+	end
+
 	-- Roll for rewards
 	for _, reward in ipairs(DigDirtRewards) do
 		if ZombRandFloat(0, 1) <= reward.chance then
@@ -164,12 +237,14 @@ function ISDigDirtAction:complete()
 	triggerEvent("OnContainerUpdate", self.character:getSquare())
 end
 
-function ISDigDirtAction:new (character, entity, shovel)
+function ISDigDirtAction:new (character, entity, shovel, emptyBag)
 	local o = ISBaseTimedAction.new(self, character)
 	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
 	o.tool 			= shovel; 		-- Class: HandWeapon, extends InventoryItem
-	o.maxTime 		= 1500;
+	o.emptyBag		= emptyBag
+	o.newBag		= "Base.Dirtbag"
+	o.maxTime 		= 100;
 	o.eventName 	= "DiggingPit_DigDirtEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_DigDirt");
 	o.animName 		= "DiggingPit_DigDirt"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
@@ -178,5 +253,6 @@ function ISDigDirtAction:new (character, entity, shovel)
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
+	--o.caloriesModifier = 8;
 	return o	
 end
