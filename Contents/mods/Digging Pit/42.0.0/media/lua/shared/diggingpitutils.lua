@@ -86,3 +86,25 @@ function diggingpitutils.IsTileDirt(params)
     return ISShovelGroundCursor.GetDirtGravelSand(params.square) == "dirt"
 end
 
+function diggingpitutils.getDirty(playerObj)
+	local dirtyChance = 0.60
+	local bodyParts = {
+		"Hand_L", "Hand_R",
+		"ForeArm_L", "ForeArm_R",
+		"UpperArm_L", "UpperArm_R",
+		"Torso_Upper", "Torso_Lower",
+		"UpperLeg_L", "UpperLeg_R",
+		"LowerLeg_L", "LowerLeg_R",
+		"Foot_L", "Foot_R",
+	}
+	-- Roll chance to dirty each body part
+	for _, part in ipairs(bodyParts) do
+		if ZombRandFloat(0, 1) <= dirtyChance then
+			-- Spawn reward on the world
+			playerObj:addDirt(BloodBodyPartType.FromString(part), 1, false);
+		end
+	end
+	-- ISWorldObjectContextMenu.onwashCloting
+	--Hand_LHand_RForeArm_LForeArm_RUpperArm_LUpperArm_RTorso_UpperTorso_LowerHeadNeckGroinUpperLeg_LUpperLeg_RLowerLeg_LLowerLeg_RFoot_LFoot_RBackMAX
+	-- player:addDirt(BloodBodyPartType.FromIndex(BodyPartType.ToIndex(bodyPart:getType())), nil, false);
+end
