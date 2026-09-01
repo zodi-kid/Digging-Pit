@@ -98,6 +98,7 @@ function ISQuarryStoneAction:animEvent(event, parameter)
 			-- Put your back into it >:)
 			self.character:setMetabolicTarget(Metabolics.HeavyWork);
 			self:useEndurance()
+			diggingpitutils.getDirty(self.character)
 		end
 	end
 end

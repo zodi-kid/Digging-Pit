@@ -141,6 +141,7 @@ function ISDigDirtAction:animEvent(event, parameter)
 			-- Put your back into it >:)
 			self.character:setMetabolicTarget(Metabolics.DiggingSpade);
 			self:useEndurance()
+			diggingpitutils.getDirty(self.character)
 		end
 	end
 end

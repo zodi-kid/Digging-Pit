@@ -1,11 +1,11 @@
 [X]Detect if the player is standing on the right tile in isValid()
 [X]FIX CONTEXT MENU
-[]Make it deletable
-[]Implement DigDirt Action
+[X]Make it deletable
+[X]Implement DigDirt Action
 [X]Refresh World inventory after gathering Stone
 []Set the time of every action according to the length of the animation
 [X]Configure stamina drain
-[]Configure dirtiness
+[X]Configure dirtiness
 [X]Configure durability loss
 []Building icon
 []Context menu icon
