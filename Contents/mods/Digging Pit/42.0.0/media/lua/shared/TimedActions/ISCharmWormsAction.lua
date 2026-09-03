@@ -1,23 +1,23 @@
 require "TimedActions/ISBaseTimedAction"
 
-ISDigStoneAction = ISBaseTimedAction:derive("ISDigStoneAction");
+ISCharmWormsAction = ISBaseTimedAction:derive("ISCharmWormsAction");
 
-local DigStoneRewards = {
-	{ item = "Base.Stone2", 		chance = 0.95 },
-	{ item = "Base.Clay", 			chance = 0.20 },
-	{ item = "Base.SharpedStone", 	chance = 0.10 },
-	{ item = "Base.IronOre", 		chance = 0.05 },
+local CharmWormRewards = {
+	{ item = "Base.Worm", 	chance = 0.60 },
+	{ item = "Base.Worm", 	chance = 0.30 },
+	{ item = "Base.Worm", 	chance = 0.00 },
 }
 
-function ISDigStoneAction:isValid()
+function ISCharmWormsAction:isValid()
 	-- Check tool is not null
 	if not self.tool then
 		return false
 	end
 	-- Check tool is non-broken, and correct type
-	if self.tool:isBroken() or not self.tool:hasTag(ItemTag.DIG_GRAVE) then
+	if self.tool:isBroken() or not (self.tool:getType() == "WoodenStick2") then
 		return false
 	end
+	print("[DiggingPit]: 	Tool check correct")
 	-- Check player has tool
 	if isClient() then
 		if not self.character:getInventory():containsID(self.tool:getID()) then
@@ -28,7 +28,7 @@ function ISDigStoneAction:isValid()
 			return false
 		end
 	end
-	
+	print("[DiggingPit]: 	Player has tool (WoodenStick2)")
 	if diggingpitutils.isPlayerTooExhausted(self.character) then
 		return false
 	end
@@ -36,7 +36,7 @@ function ISDigStoneAction:isValid()
 	if diggingpitutils.isPlayerTooPained(self.character) then
 		return false
 	end
-	
+	print("[DiggingPit]: 	Moodles check correct (WoodenStick2)")
 	-- Check if player is standing opposite of the tile
 	if not diggingpitutils.isOnOppositeSquare(self.character, self.entity) then
 		return false
@@ -52,14 +52,14 @@ function ISDigStoneAction:isValid()
 	return true
 end
 
-function ISDigStoneAction:waitToStart()
+function ISCharmWormsAction:waitToStart()
 	-- Turn towards the Digging Pit
 	self.character:faceThisObject(self.entity)
 	-- Wait until it returns False
 	return self.character:isTurning() or self.character:shouldBeTurning()
 end
 
-function ISDigStoneAction:start()
+function ISCharmWormsAction:start()
 	if isClient() and self.tool then
         self.tool = self.character:getInventory():getItemById(self.tool:getID())
     end
@@ -73,20 +73,19 @@ function ISDigStoneAction:start()
 	self:setActionAnim(self.animName);
 	self:setOverrideHandModels(self.tool, nil);
 	self.soundPlaying = self.character:playSound(self.soundProgress);
-	addSound(self.character, self.character:getX(), self.character:getY(), self.character:getZ(), 10, 1)
+	addSound(self.character, self.character:getX(), self.character:getY(), self.character:getZ(), 5, 1)
 end
 
-function ISDigStoneAction:serverStart()
+function ISCharmWormsAction:serverStart()
 	--self.item = self.character:getPrimaryHandItem()
 	self.tool = self.character:getInventory():getItemById(self.tool:getID())
 	emulateAnimEvent(self.netAction, self.maxTime, self.eventName, nil)
 end
 
 -- Server side computing: changes to character, items, etc.
-function ISDigStoneAction:animEvent(event, parameter)
+function ISCharmWormsAction:animEvent(event, parameter)
 	if not isClient() then
 		if event == self.eventName then
-			self:printTime("Event")
 			if self.tool then -- Sanity check
 				-- Tool durability loss check
 				if self.tool:damageCheck(0, 2, false) then
@@ -105,7 +104,7 @@ function ISDigStoneAction:animEvent(event, parameter)
 	end
 end
 
-function ISDigStoneAction:useEndurance()
+function ISCharmWormsAction:useEndurance()
 	if self.tool then
 		local fatigue = self.tool:getWeight()
 			* self.tool:getFatigueMod(self.character)
@@ -118,7 +117,7 @@ function ISDigStoneAction:useEndurance()
 	end
 end
 
-function ISDigStoneAction:update()
+function ISCharmWormsAction:update()
 	-- Called every game tick
 	-- Make sure the player is still facing the Digging Pit
 	self.character:faceThisObject(self.entity)
@@ -128,7 +127,7 @@ function ISDigStoneAction:update()
     end
 end
 
-function ISDigStoneAction:stop()
+function ISCharmWormsAction:stop()
 	-- Interrupted
 	self.character:stopOrTriggerSound(self.soundPlaying)
     ISBaseTimedAction.stop(self)
@@ -137,7 +136,7 @@ function ISDigStoneAction:stop()
     end
 end
 
-function ISDigStoneAction:perform()
+function ISCharmWormsAction:perform()
 	--- Finished
 	self.character:stopOrTriggerSound(self.soundPlaying)
 	if self.tool then
@@ -147,51 +146,44 @@ function ISDigStoneAction:perform()
 	-- Repeat the action, unless conditions unmet or player queues something else
 	local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
 	if #queue.queue == 1 and self:isValid() then
-		local nextAction = ISDigStoneAction:new(self.character, self.entity, self.tool)
+		local nextAction = ISCharmWormsAction:new(self.character, self.entity, self.tool)
 		ISTimedActionQueue.addAfter(self, nextAction)
 	end	
 	
 	ISBaseTimedAction.perform(self); -- Unqueue and log
 end
 
-function ISDigStoneAction:complete()
+function ISCharmWormsAction:complete()
+	local skillBonus = math.max(0, self.character:getPerkLevel(Perks.Foraging) - 6)
 	-- Roll for rewards
-	for _, reward in ipairs(DigStoneRewards) do
-		if ZombRandFloat(0, 1) <= reward.chance then
-			-- Spawn reward on the world
-			self.character:getSquare():SpawnWorldInventoryItem(reward.item, 0.0, 0.0, 0.0)
+	for _, reward in ipairs(CharmWormRewards) do
+		if ZombRandFloat(0, 1) <= (reward.chance + skillBonus*0.05) then
+			-- Add reward to player inventory
+			local rewardItem = self.character:getInventory():AddItem(reward.item)
+			if rewardItem then
+				sendAddItemToContainer(self.character:getInventory(), rewardItem)
+			end
 		end
 	end
-	-- reloads world inventory
-	triggerEvent("OnContainerUpdate", self.character:getSquare())
+	-- reloads player inventory
+	getPlayerInventory(self.character:getPlayerNum()):refreshBackpacks();
+	getPlayerLoot(self.character:getPlayerNum()):refreshBackpacks();
 end
 
-function ISDigStoneAction:new (character, entity, shovel)
+function ISCharmWormsAction:new (character, entity, rod)
 	local o = ISBaseTimedAction.new(self, character)
 	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
-	o.tool 			= shovel; 		-- Class: HandWeapon, extends InventoryItem
-	o.maxTime 		= 500;			-- Miliseconds / 2??? If 10000 is used, it actually takes 20 seconds
-	o.eventName 	= "DiggingPit_DigStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
-	o.text 			= getText("ContextMenu_DigStone");
-	o.animName 		= "DiggingPit_DigStone"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
-	o.soundProgress = "Shoveling";
+	o.tool 			= rod; 		-- Class: HandWeapon, extends InventoryItem
+	o.maxTime 		= 500;
+	o.eventName 	= "DiggingPit_CharmWormsEvent"; -- Has to match <m_EventName> 	from media/AnimSets/player/actions
+	o.text 			= getText("ContextMenu_CharmWorms");
+	o.animName 		= "DiggingPit_CharmWorms"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
+	o.soundProgress = "MakeFireNotchedPlank";
 	o.soundFinished = "";
 	o.soundPlaying 	= nil;			-- Used to store the id of the sound playing, so it can be stopped later
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
-	o.time = os.time()
 	return o	
-end
-
-function ISDigStoneAction:printTime(string)
-	local newTime = os.time()
-	print("[DiggingPit]: 	" .. tostring(string) .. " " .. tostring(newTime - self.time))
-	self.time = newTime
-	--print("Delta: " .. tostring(getGameTime():getTimeDelta()))
-end
-
-function ISDigStoneAction:getDuration()
-	return 1000
 end

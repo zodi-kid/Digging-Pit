@@ -3,13 +3,18 @@
 [X]Make it deletable
 [X]Implement DigDirt Action
 [X]Refresh World inventory after gathering Stone
-[]Set the time of every action according to the length of the animation
 [X]Configure stamina drain
 [X]Configure dirtiness
 [X]Configure durability loss
-[]Building icon
-[]Context menu icon
 [X]See if building can be limited to grass/dirt/natural_blends
+[]Charm worms
+[]Building icon
+[]Building description
+[]Context menu icon
+[]Mod icon
+[]Mod description
+[]Adjust duration of actions
+[]Balance rewards
+[]Fine-tune fatigue
 []Consider adding strength/fitness XP for digging/quarrying
-[]Balance rewards, fatigue, noise, etc.
 []Stress test it

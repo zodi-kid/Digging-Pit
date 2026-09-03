@@ -114,7 +114,7 @@ function ISDigDirtAction:start()
 	--self:setActionAnim(BuildingHelper.getShovelAnim(self.tool));
 	self:setActionAnim(self.animName);
 	self:setOverrideHandModels(self.tool, nil);
-	self.sound = self.character:playSound(self.soundProgress);
+	self.soundPlaying = self.character:playSound(self.soundProgress);
 	addSound(self.character, self.character:getX(), self.character:getY(), self.character:getZ(), 10, 1)
 end
 
@@ -175,7 +175,7 @@ end
 
 function ISDigDirtAction:stop()
 	-- Interrupted
-	self.character:stopOrTriggerSound(self.sound)
+	self.character:stopOrTriggerSound(self.soundPlaying)
     ISBaseTimedAction.stop(self)
 	if self.tool then
         self.tool:setJobDelta(0.0);
@@ -187,7 +187,7 @@ end
 
 function ISDigDirtAction:perform()
 	--- Finished
-	self.character:stopOrTriggerSound(self.sound)
+	self.character:stopOrTriggerSound(self.soundPlaying)
 	if self.tool then
         self.tool:setJobDelta(0.0);
     end
@@ -246,11 +246,12 @@ function ISDigDirtAction:new (character, entity, shovel, emptyBag)
 	o.emptyBag		= emptyBag
 	o.newBag		= "Base.Dirtbag"
 	o.maxTime 		= 100;
-	o.eventName 	= "DiggingPit_DigDirtEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
+	o.eventName 	= "DiggingPit_DigDirtEvent";-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_DigDirt");
-	o.animName 		= "DiggingPit_DigDirt"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
+	o.animName 		= "DiggingPit_DigDirt"; 	-- Has to match <m_Name> 		from media/AnimSets/player/actions
 	o.soundProgress = "Shoveling";
 	o.soundFinished = "";
+	o.soundPlaying 	= nil;			-- Used to store the id of the sound playing, so it can be stopped later
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;

@@ -72,7 +72,7 @@ function ISQuarryStoneAction:start()
 	self:setActionAnim(self.animName);
 	self:setOverrideHandModels(self.tool, nil);
 	addSound(self.character, self.character:getX(),self.character:getY(),self.character:getZ(), 20, 10);
-	--self.sound = self.character:playSound("Shoveling");	
+	--self.soundPlaying = self.character:playSound("Shoveling");	
 end
 
 function ISQuarryStoneAction:serverStart()
@@ -128,7 +128,7 @@ end
 
 function ISQuarryStoneAction:stop()
 	-- Interrupted
-	--self.character:stopOrTriggerSound(self.sound)
+	--self.character:stopOrTriggerSound(self.soundPlaying)
     ISBaseTimedAction.stop(self)
 	if self.tool then
         self.tool:setJobDelta(0.0);
@@ -137,7 +137,7 @@ end
 
 function ISQuarryStoneAction:perform()
 	--- Finished
-	--self.character:stopOrTriggerSound(self.sound)
+	--self.character:stopOrTriggerSound(self.soundPlaying)
 	if self.tool then
         --self.tool:getContainer():setDrawDirty(true); -- Makes the character dirty
         self.tool:setJobDelta(0.0);
@@ -172,11 +172,12 @@ function ISQuarryStoneAction:new (character, entity, pickaxe)
 	o.entity 		= entity 		-- Class: IsoObject
 	o.tool 			= pickaxe; 		-- Class: HandWeapon, extends InventoryItem
 	o.maxTime 		= 1500;
-	o.eventName 	= "DiggingPit_QuarryStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
+	o.eventName 	= "DiggingPit_QuarryStoneEvent"; -- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_QuarryStone");
-	o.animName 		= "DiggingPit_QuarryStone"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
+	o.animName 		= "DiggingPit_QuarryStone"; 	-- Has to match <m_Name> 		from media/AnimSets/player/actions
 	o.soundProgress = "";
 	o.soundFinished = "CraftMineralDepositRemove";
+	o.soundPlaying 	= nil;			-- Used to store the id of the sound playing, so it can be stopped later
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;

@@ -54,11 +54,25 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 			return not item:isBroken() and item:hasTag(ItemTag.PICK_AXE)
 		end
 	)
+	-- And for a wooden rod
+	local rod = playerInv:getFirstEvalRecurse(
+		function(item)
+			return not item:isBroken() and (item:getType() == "WoodenStick2")
+		end
+	)
 
 	-- And for a valid sack
 	local _, sack = ISShovelGroundCursor.GetEmptyItem(playerObj, "dirt")
 	
 	-- Each option and its associated action
+	local optionCharmWorms = DiggingPitSubMenu:addOption(getText("ContextMenu_CharmWorms"), nil,
+		function()
+			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
+				ISTimedActionQueue.add(ISCharmWormsAction:new(playerObj, entity, rod))
+			end
+		end
+	)
+	
 	local optionDigDirt = DiggingPitSubMenu:addOption(getText("ContextMenu_DigDirt"), nil,
 		function() -- I hate all these callbacks
 			if diggingpitutils.walkToOppositeSquare(playerObj, entity) then
@@ -134,6 +148,12 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 		optionDigDirt.notAvailable = true;
 		optionDigDirt.toolTip = ISWorldObjectContextMenu.addToolTip();
 		optionDigDirt.toolTip.description = getText("ContextMenu_NeedSack");
+	end
+	
+	if not rod then
+		optionCharmWorms.notAvailable = true;
+		optionCharmWorms.toolTip = ISWorldObjectContextMenu.addToolTip();
+		optionCharmWorms.toolTip.description = getText("ContextMenu_NeedRod");
 	end
 	
 	return true
