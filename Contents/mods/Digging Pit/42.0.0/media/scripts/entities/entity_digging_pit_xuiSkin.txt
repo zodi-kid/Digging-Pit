@@ -6,7 +6,7 @@ module Base
         {
             LuaWindowClass = ISEntityWindow,
             DisplayName = Digging Pit,
-            Icon = Build_Coalpit,
+            Icon = Build_DiggingPit,
         }
     }
 }

@@ -15,6 +15,16 @@
 		<m_TimePc>1.00</m_TimePc>
 		<m_ParameterValue></m_ParameterValue>
 	</m_Events>
+	<m_Events>
+		<m_EventName>DiggingPit_DigStoneStart</m_EventName>
+		<m_TimePc>0.00</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
+	<m_Events>
+		<m_EventName>DiggingPit_DigStoneFinish</m_EventName>
+		<m_TimePc>1.00</m_TimePc>
+		<m_ParameterValue></m_ParameterValue>
+	</m_Events>
 	<m_SubStateBoneWeights>
 		<boneName>Dummy01</boneName>
 	</m_SubStateBoneWeights>

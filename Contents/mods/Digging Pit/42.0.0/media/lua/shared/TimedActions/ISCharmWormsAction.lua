@@ -17,7 +17,6 @@ function ISCharmWormsAction:isValid()
 	if self.tool:isBroken() or not (self.tool:getType() == "WoodenStick2") then
 		return false
 	end
-	print("[DiggingPit]: 	Tool check correct")
 	-- Check player has tool
 	if isClient() then
 		if not self.character:getInventory():containsID(self.tool:getID()) then
@@ -28,15 +27,15 @@ function ISCharmWormsAction:isValid()
 			return false
 		end
 	end
-	print("[DiggingPit]: 	Player has tool (WoodenStick2)")
+	if self.character:getPerkLevel(Perks.PlantScavenging) < 6 then
+		return false
+	end	
 	if diggingpitutils.isPlayerTooExhausted(self.character) then
 		return false
 	end
-	
 	if diggingpitutils.isPlayerTooPained(self.character) then
 		return false
 	end
-	print("[DiggingPit]: 	Moodles check correct (WoodenStick2)")
 	-- Check if player is standing opposite of the tile
 	if not diggingpitutils.isOnOppositeSquare(self.character, self.entity) then
 		return false
@@ -86,6 +85,9 @@ end
 function ISCharmWormsAction:animEvent(event, parameter)
 	if not isClient() then
 		if event == self.eventName then
+			local newTime = getTimestampMs()
+			print("[DiggingPit]: 	Worm charming time " .. (newTime - self.time))
+			self.time = newTime
 			if self.tool then -- Sanity check
 				-- Tool durability loss check
 				if self.tool:damageCheck(0, 2, false) then
@@ -154,7 +156,7 @@ function ISCharmWormsAction:perform()
 end
 
 function ISCharmWormsAction:complete()
-	local skillBonus = math.max(0, self.character:getPerkLevel(Perks.Foraging) - 6)
+	local skillBonus = math.max(0, self.character:getPerkLevel(Perks.PlantScavenging) - 6)
 	-- Roll for rewards
 	for _, reward in ipairs(CharmWormRewards) do
 		if ZombRandFloat(0, 1) <= (reward.chance + skillBonus*0.05) then
@@ -175,7 +177,7 @@ function ISCharmWormsAction:new (character, entity, rod)
 	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
 	o.tool 			= rod; 		-- Class: HandWeapon, extends InventoryItem
-	o.maxTime 		= 500;
+	o.maxTime 		= self:getDuration();
 	o.eventName 	= "DiggingPit_CharmWormsEvent"; -- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_CharmWorms");
 	o.animName 		= "DiggingPit_CharmWorms"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
@@ -185,5 +187,10 @@ function ISCharmWormsAction:new (character, entity, rod)
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
+	o.time 			= getTimestampMs()
 	return o	
+end
+
+function ISCharmWormsAction:getDuration()
+	return 3000 -- Anim: 4.084s
 end

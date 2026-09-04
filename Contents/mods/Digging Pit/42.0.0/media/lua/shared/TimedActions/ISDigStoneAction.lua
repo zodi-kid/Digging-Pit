@@ -3,10 +3,10 @@ require "TimedActions/ISBaseTimedAction"
 ISDigStoneAction = ISBaseTimedAction:derive("ISDigStoneAction");
 
 local DigStoneRewards = {
-	{ item = "Base.Stone2", 		chance = 0.95 },
-	{ item = "Base.Clay", 			chance = 0.20 },
-	{ item = "Base.SharpedStone", 	chance = 0.10 },
-	{ item = "Base.IronOre", 		chance = 0.05 },
+	{ item = "Base.Stone2", 		chance = 0.60 },
+	{ item = "Base.Clay", 			chance = 0.10 },
+	{ item = "Base.SharpedStone", 	chance = 0.08 },
+	{ item = "Base.IronOre", 		chance = 0.02 },
 }
 
 function ISDigStoneAction:isValid()
@@ -69,7 +69,6 @@ function ISDigStoneAction:start()
         self.tool:setJobDelta(0.0);
 	end
 	-- Role-play time
-	--self:setActionAnim(BuildingHelper.getShovelAnim(self.tool));
 	self:setActionAnim(self.animName);
 	self:setOverrideHandModels(self.tool, nil);
 	self.soundPlaying = self.character:playSound(self.soundProgress);
@@ -86,7 +85,6 @@ end
 function ISDigStoneAction:animEvent(event, parameter)
 	if not isClient() then
 		if event == self.eventName then
-			self:printTime("Event")
 			if self.tool then -- Sanity check
 				-- Tool durability loss check
 				if self.tool:damageCheck(0, 2, false) then
@@ -112,7 +110,7 @@ function ISDigStoneAction:useEndurance()
 			* self.tool:getEnduranceMod()
 			* self.character:getFatigueMod()
 			* 0.1
-		local balanceFactor = 0.041 -- used to fine-tune endurance draining
+		local balanceFactor = 0.11 -- used to fine-tune endurance draining
 		fatigue = fatigue * balanceFactor
 		self.character:getStats():remove(CharacterStat.ENDURANCE, fatigue)
 	end
@@ -171,7 +169,7 @@ function ISDigStoneAction:new (character, entity, shovel)
 	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
 	o.tool 			= shovel; 		-- Class: HandWeapon, extends InventoryItem
-	o.maxTime 		= 500;			-- Miliseconds / 2??? If 10000 is used, it actually takes 20 seconds
+	o.maxTime 		= self:getDuration();			-- Miliseconds / 2??? If 10000 is used, it actually takes 20 seconds
 	o.eventName 	= "DiggingPit_DigStoneEvent"; 	-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_DigStone");
 	o.animName 		= "DiggingPit_DigStone"; 		-- Has to match <m_Name> 		from media/AnimSets/player/actions
@@ -181,17 +179,9 @@ function ISDigStoneAction:new (character, entity, shovel)
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
-	o.time = os.time()
 	return o	
 end
 
-function ISDigStoneAction:printTime(string)
-	local newTime = os.time()
-	print("[DiggingPit]: 	" .. tostring(string) .. " " .. tostring(newTime - self.time))
-	self.time = newTime
-	--print("Delta: " .. tostring(getGameTime():getTimeDelta()))
-end
-
 function ISDigStoneAction:getDuration()
-	return 1000
+	return 182.5 -- Anim: 3.75s
 end

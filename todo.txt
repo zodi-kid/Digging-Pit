@@ -7,7 +7,7 @@
 [X]Configure dirtiness
 [X]Configure durability loss
 [X]See if building can be limited to grass/dirt/natural_blends
-[]Charm worms
+[]Charm worms skill requirement
 []Building icon
 []Building description
 []Context menu icon

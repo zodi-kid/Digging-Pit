@@ -35,7 +35,7 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 	
 	-- Create Main Option
 	local DiggingPitOption = context:addOption(getText("ContextMenu_DiggingPit"), worldobjects, nil)
-	-- DiggingPitOption.iconTexture = getTexture("media/digging_pit_icon")
+	DiggingPitOption.iconTexture = getTexture("media/digging_pit_icon")
 	-- Initialize the base for the sub-options and let it hang from the Main Option
 	local DiggingPitSubMenu = ISContextMenu:getNew(context)
 	context:addSubMenu(DiggingPitOption, DiggingPitSubMenu)
@@ -96,6 +96,11 @@ function DiggingPitMenu.OnFillWorldObjectContextMenu(player, context, worldobjec
 			end
 		end
 	)
+	if playerObj:getPerkLevel(Perks.PlantScavenging) < 6 then
+		optionCharmWorms.notAvailable = true;
+		optionCharmWorms.toolTip = ISWorldObjectContextMenu.addToolTip();
+		optionCharmWorms.toolTip.description = getText("ContextMenu_NeedForaging6");
+	end
 	
 	-- If the player is too tired, disable the action and add a tooltip to let them know
 	if diggingpitutils.isPlayerTooExhausted(playerObj) then

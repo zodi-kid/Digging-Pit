@@ -4,7 +4,7 @@ ISQuarryStoneAction = ISBaseTimedAction:derive("ISQuarryStoneAction");
 
 local QuarryStoneRewards = {
 	{ item = "Base.Stone2", 		chance = 0.95 },
-	{ item = "Base.Clay", 			chance = 0.20 },
+	{ item = "Base.Clay", 			chance = 0.12 },
 	{ item = "Base.SharpedStone", 	chance = 0.10 },
 	{ item = "Base.IronOre", 		chance = 0.05 },
 }
@@ -171,7 +171,7 @@ function ISQuarryStoneAction:new (character, entity, pickaxe)
 	o.character 	= character;	-- Class: IsoPlayer, extends IsoGameCharacter
 	o.entity 		= entity 		-- Class: IsoObject
 	o.tool 			= pickaxe; 		-- Class: HandWeapon, extends InventoryItem
-	o.maxTime 		= 1500;
+	o.maxTime 		= self:getDuration();
 	o.eventName 	= "DiggingPit_QuarryStoneEvent"; -- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_QuarryStone");
 	o.animName 		= "DiggingPit_QuarryStone"; 	-- Has to match <m_Name> 		from media/AnimSets/player/actions
@@ -182,4 +182,8 @@ function ISQuarryStoneAction:new (character, entity, pickaxe)
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
 	return o
+end
+-- Animation takes 2.5 seconds
+function ISQuarryStoneAction:getDuration()
+	return 125 -- Anim: 2.5s
 end

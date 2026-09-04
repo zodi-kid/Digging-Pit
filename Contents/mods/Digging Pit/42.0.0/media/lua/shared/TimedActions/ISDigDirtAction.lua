@@ -3,11 +3,11 @@ require "TimedActions/ISBaseTimedAction"
 ISDigDirtAction = ISBaseTimedAction:derive("ISDigDirtAction");
 
 local DigDirtRewards = {
-	{ item = "Base.Stone2", 		chance = 0.05 },
-	{ item = "Base.Clay", 			chance = 0.10 },
+	{ item = "Base.Stone2", 		chance = 0.01 },
+	{ item = "Base.Clay", 			chance = 0.01 },
 	{ item = "Base.SharpedStone", 	chance = 0.01 },
 	--{ item = "Base.IronOre", 		chance = 0.05 },
-	{ item = "Base.Worm", 			chance = 0.60 },
+	{ item = "Base.Worm", 			chance = 0.30 },
 }
 
 function ISDigDirtAction:isValid()
@@ -196,11 +196,11 @@ function ISDigDirtAction:perform()
 	end
 	
 	-- Repeat the action, unless conditions unmet or player queues something else
-	--local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
-	--if #queue.queue == 1 and self:isValid() then
-		--local nextAction = ISDigDirtAction:new(self.character, self.entity, self.tool)
-		--ISTimedActionQueue.addAfter(self, nextAction)
-	--end	
+	local queue = ISTimedActionQueue.getTimedActionQueue(self.character)
+	if #queue.queue == 1 and self:isValid() then
+		local nextAction = ISDigDirtAction:new(self.character, self.entity, self.tool)
+		ISTimedActionQueue.addAfter(self, nextAction)
+	end	
 	
 	getPlayerInventory(self.character:getPlayerNum()):refreshBackpacks();
 	getPlayerLoot(self.character:getPlayerNum()):refreshBackpacks();
@@ -245,7 +245,7 @@ function ISDigDirtAction:new (character, entity, shovel, emptyBag)
 	o.tool 			= shovel; 		-- Class: HandWeapon, extends InventoryItem
 	o.emptyBag		= emptyBag
 	o.newBag		= "Base.Dirtbag"
-	o.maxTime 		= 100;
+	o.maxTime 		= self:getDuration();
 	o.eventName 	= "DiggingPit_DigDirtEvent";-- Has to match <m_EventName> 	from media/AnimSets/player/actions
 	o.text 			= getText("ContextMenu_DigDirt");
 	o.animName 		= "DiggingPit_DigDirt"; 	-- Has to match <m_Name> 		from media/AnimSets/player/actions
@@ -255,6 +255,9 @@ function ISDigDirtAction:new (character, entity, shovel, emptyBag)
 	o.stopOnWalk 	= true;
 	o.stopOnRun 	= true;
 	o.stopOnAim 	= true;
-	--o.caloriesModifier = 8;
 	return o	
+end
+
+function ISDigDirtAction:getDuration()
+	return 182.5 -- Anim: 3.75s
 end
